@@ -31,13 +31,12 @@ func main() {
 	// Uncomment ONE of these approaches to fix:
 
 	// Approach 1: time.Sleep — TERRIBLE, only for demos
-	// time.Sleep(3 * time.Second)
+	// time.Sleep(2 * time.Second)
 
 	// Approach 2: select{} — blocks forever (good for servers)
 	// select {}
 
 	// Approach 3: sync.WaitGroup — the right way (see next example)
-
 	fmt.Println("main() is returning... goroutines may be killed!")
 
 	// Try running this: you'll see "started" messages but probably NOT "finished"

@@ -62,7 +62,7 @@ func main() {
 	// Slow consumer
 	for job := range jobs {
 		fmt.Printf("  [consumer] Processing job %d\n", job)
-		time.Sleep(300 * time.Millisecond) // slow processing
+		time.Sleep(3 * time.Second) // slow processing
 	}
 
 	// ============================================

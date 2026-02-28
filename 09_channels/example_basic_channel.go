@@ -73,6 +73,7 @@ func main() {
 		go func(id int) {
 			time.Sleep(time.Duration(id*100) * time.Millisecond)
 			ch2 <- fmt.Sprintf("worker %d reporting", id)
+			fmt.Printf("Sent to %d\n",i)
 		}(i)
 	}
 
