@@ -107,29 +107,37 @@ func main() {
 	}
 
 	// ============================================
-	// Example 3: Nested timeouts (inner tighter than outer)
+	// Example 3: Nested timeouts (OUTER times out BEFORE inner)
 	// ============================================
-	fmt.Println("\n=== Example 3: Nested timeouts ===")
+	fmt.Println("\n=== Example 3: Parent context timeout cancels child ===")
 
-	outerCtx, outerCancel := context.WithTimeout(context.Background(), 2*time.Second)
+	// OUTER: 300ms (will timeout first!)
+	outerCtx, outerCancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer outerCancel()
 
-	fmt.Println("  Outer timeout: 2s")
+	fmt.Println("  Outer timeout: 300ms (parent)")
 
-	// Inner is tighter — 500ms
-	innerCtx, innerCancel := context.WithTimeout(outerCtx, 500*time.Millisecond)
+	// INNER: 700ms (longer than outer, but won't matter!)
+	innerCtx, innerCancel := context.WithTimeout(outerCtx, 700*time.Millisecond)
 	defer innerCancel()
 
-	fmt.Println("  Inner timeout: 500ms")
+	fmt.Println("  Inner timeout: 700ms (child)")
 
-	_, err = simulateAPICall(innerCtx, "inner-call", 800*time.Millisecond)
-	fmt.Printf("  Inner call result: %v\n", err) // deadline exceeded (500ms)
+	start3 := time.Now()
 
-	// Outer is still alive!
-	_, err = simulateAPICall(outerCtx, "outer-call", 300*time.Millisecond)
+	// Try to call with inner context for 600ms
+	// Even though 600ms < 700ms (inner timeout), the outer will cancel at 300ms!
+	_, err = simulateAPICall(innerCtx, "inner-call", 600*time.Millisecond)
+	elapsed := time.Since(start3).Round(time.Millisecond)
+
 	if err != nil {
-		fmt.Printf("  Outer call: %v\n", err)
+		fmt.Printf("  Inner call FAILED at %v: %v\n", elapsed, err)
+		fmt.Println("  ⚠️  Inner was cancelled by OUTER timeout (300ms), not its own (700ms)!")
 	} else {
-		fmt.Println("  Outer call: succeeded (outer context still valid)")
+		fmt.Println("  Inner call: succeeded")
 	}
+
+	fmt.Println("\n  KEY INSIGHT:")
+	fmt.Println("  When a parent context times out, ALL child contexts are immediately cancelled.")
+	fmt.Println("  The child's longer timeout (700ms) is irrelevant — parent wins at 300ms.")
 }

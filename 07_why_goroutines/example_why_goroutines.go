@@ -70,7 +70,6 @@ func main() {
 			_ = id * id
 		}(i)
 	}
-
 	wg2.Wait()
 	elapsed2 := time.Since(start2)
 	fmt.Printf("100,000 goroutines completed in %v\n", elapsed2)
